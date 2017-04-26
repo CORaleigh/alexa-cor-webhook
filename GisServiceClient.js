@@ -14,14 +14,18 @@ class GisServiceClient {
         return new Promise((fulfill, reject) => {
             this.__geocodeAddress(requestOptions, fulfill, reject).then(location => {
                 if (!location) {
-                    this.emit(":tell", "Your address was not found");
+                    reject("Your address was not found");
                 }
                 this.__getGisAttribute(location, fulfill, reject).then(attribute => {
                     if (!attribute) {
-                        this.emit(":tell", "I could not find information for your address");
+                        reject("I could not find information for your address");
                     }
                     fulfill(this.speech + attribute);
+                }).catch(err => {
+                    reject(err);
                 });
+            }).catch(err => {
+                reject(err);
             });
           
         });
@@ -52,11 +56,12 @@ class GisServiceClient {
                 response.on('data', (data) => {
                     let responsePayloadObject = JSON.parse(data);
                     console.log(responsePayloadObject);
+                    
                     if (responsePayloadObject.features.length > 0) {
                         let attribute = responsePayloadObject.features[0].attributes[field];
                         fulfill(attribute);
                     } else {
-                        fulfill(null);
+                        reject("Sorry I could not find information for your address");
                     }
                 });
             });

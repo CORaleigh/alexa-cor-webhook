@@ -1,11 +1,14 @@
 'use strict';
 
 var Alexa = require('alexa-sdk');
+const moment = require('moment');
 const AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient');
 const GisServiceClient = require('./GisServiceClient');
 const APP_ID = 'amzn1.ask.skill.036e0aaf-ba07-4e8b-953e-fcc5a1d6a546';
 const ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address";
 const PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+
+
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context);
     alexa.appId = APP_ID;
@@ -13,7 +16,7 @@ exports.handler = function(event, context, callback){
     alexa.execute();
 };
 
-function getAddressFromDevice (consentToken, deviceId, apiEndpoint) {
+const getAddressFromDevice = function (consentToken, deviceId, apiEndpoint) {
     return new Promise((fulfill, reject) => { 
         const alexaDeviceAddressClient = new AlexaDeviceAddressClient(apiEndpoint, deviceId, consentToken);
         let deviceAddressRequest = alexaDeviceAddressClient.getFullAddress();
@@ -59,10 +62,15 @@ var handlers = {
             }
             const deviceId = this.event.context.System.device.deviceId;
             const apiEndpoint = this.event.context.System.apiEndpoint;
-            this.getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
+
+
+            getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
                 let gisServiceRequest = gisServiceClient.getGisData(address);
+                
                 gisServiceRequest.then((response) => {
                     this.emit(":tell", response);
+                }).catch(err => {
+                    this.emit(":tell", err);
                 });                                
             }).catch(err => {
                 this.emit(":tell", err);
@@ -97,10 +105,12 @@ var handlers = {
             }
             const deviceId = this.event.context.System.device.deviceId;
             const apiEndpoint = this.event.context.System.apiEndpoint;
-            this.getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
+            getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
                 let gisServiceRequest = gisServiceClient.getGisData(address);
                 gisServiceRequest.then((response) => {
                     this.emit(":tell", response);
+                }).catch(err => {
+                    this.emit(":tell", err);
                 });                                
             }).catch(err => {
                 this.emit(":tell", err);
@@ -125,14 +135,55 @@ var handlers = {
             }
             const deviceId = this.event.context.System.device.deviceId;
             const apiEndpoint = this.event.context.System.apiEndpoint;
-            this.getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
+            getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
                 let gisServiceRequest = gisServiceClient.getGisData(address);
                 gisServiceRequest.then((response) => {
                     this.emit(":tell", response);
+                }).catch(err => {
+                    this.emit(":tell", err);
                 });                                
             }).catch(err => {
                 this.emit(":tell", err);
             });
         }
-    }        
+    },
+    'Recycling': function () {
+        var intentObj = this.event.request.intent;
+        
+        //let slot = intentObj.slots.districttype.value.toLowerCase();
+        let id = 12;
+        let field = 'WEEK';
+        let gisServiceClient = new GisServiceClient(id, field, '');
+        if (typeof this.event.context === 'undefined') {
+            let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
+            gisServiceRequest.then((response) => {
+                let isOdd = (moment().week() % 2) == 1;
+                if (response === 'B' && isOdd) {
+                    this.emit(":tell", 'No this is not your recycling week');
+                } 
+                this.emit(":tell", "Yes this is your recycing week");
+            });
+        } else {
+            const consentToken = this.event.context.System.user.permissions.consentToken;
+            if(!consentToken) { 
+                this.emit(":tell", "you didnt give me permission");
+            }
+            const deviceId = this.event.context.System.device.deviceId;
+            const apiEndpoint = this.event.context.System.apiEndpoint;
+            getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
+                let gisServiceRequest = gisServiceClient.getGisData(address);
+                gisServiceRequest.then((response) => {
+                    let isOdd = (moment().week() % 2) == 1;
+                    if (response === 'B' && isOdd) {
+                        this.emit(":tell", 'No this is not your recycling week');
+                    } 
+                    this.emit(":tell", "Yes this is your recycling week");
+                }).catch(err => {
+                    this.emit(":tell", err);
+                });                                
+            }).catch(err => {
+                this.emit(":tell", err);
+            });
+        }
+    }          
 };
