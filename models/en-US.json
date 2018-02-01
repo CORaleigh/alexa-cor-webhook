@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "my raleigh",
+      "invocationName": "city of raleigh",
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
