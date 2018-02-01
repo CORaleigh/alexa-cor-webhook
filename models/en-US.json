@@ -1,0 +1,143 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "my raleigh",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "District",
+          "slots": [
+            {
+              "name": "districttype",
+              "type": "districttype",
+              "samples": []
+            }
+          ],
+          "samples": [
+            "what is my {districttype} district",
+            "what is my {districttype} area",
+            "what {districttype} district am I in",
+            "what {districttype} area am I in"
+          ]
+        },
+        {
+          "name": "Person",
+          "samples": [
+            "who is my city council person",
+            "who is my city council member",
+            "who is my council member",
+            "who is my council person"
+          ]
+        },
+        {
+          "name": "Recycling",
+          "samples": [
+            "do I need to take my recycling out this week",
+            "is it my recycling week"
+          ]
+        },
+        {
+          "name": "SolidWaste",
+          "slots": [
+            {
+              "name": "address",
+              "type": "AMAZON.StreetAddress",
+              "samples": []
+            },
+            {
+              "name": "wastetype",
+              "type": "wastetype",
+              "samples": []
+            }
+          ],
+          "samples": [
+            "when is my {wastetype} day"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "value": "CAC"
+              }
+            },
+            {
+              "name": {
+                "value": "Citizen Advisory Council"
+              }
+            },
+            {
+              "name": {
+                "value": "City Council"
+              }
+            },
+            {
+              "name": {
+                "value": "Council"
+              }
+            },
+            {
+              "name": {
+                "value": "Police"
+              }
+            }
+          ],
+          "name": "districttype"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "city council person"
+              }
+            },
+            {
+              "name": {
+                "value": "city council member"
+              }
+            }
+          ],
+          "name": "persontype"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "trash"
+              }
+            },
+            {
+              "name": {
+                "value": "recycling"
+              }
+            },
+            {
+              "name": {
+                "value": "garbage"
+              }
+            },
+            {
+              "name": {
+                "value": "yard waste"
+              }
+            }
+          ],
+          "name": "wastetype"
+        }
+      ]
+    }
+  }
+}
