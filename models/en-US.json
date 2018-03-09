@@ -16,6 +16,14 @@
           "samples": []
         },
         {
+          "name": "Menu",          
+          "samples": [
+            "what can i do",
+            "what can i try",
+            "what options are available"
+          ]
+        },
+        {
           "name": "District",
           "slots": [
             {

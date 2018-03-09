@@ -4,14 +4,14 @@ var Alexa = require('alexa-sdk');
 const moment = require('moment');
 const AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient');
 const GisServiceClient = require('./GisServiceClient');
-// const APP_ID = 'amzn1.ask.skill.036e0aaf-ba07-4e8b-953e-fcc5a1d6a546';
+const APP_ID = 'amzn1.ask.skill.84133546-b779-459d-83fb-8ab46f16aa99';
 // const ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address";
 // const PERMISSIONS = [ALL_ADDRESS_PERMISSION];
 
 
 exports.handler = function (event, context, callback) {
     var alexa = Alexa.handler(event, context);
-    // alexa.appId = APP_ID;
+    alexa.appId = APP_ID;
     alexa.registerHandlers(handlers);
     alexa.execute();
 };
@@ -53,6 +53,22 @@ const getAddressFromDevice = function (consentToken, deviceId, apiEndpoint) {
 }
 
 var handlers = {
+    'LaunchRequest': function () {
+        // CHF - in order to get the address you have to get deviceId and api token (which is returned in every alexa response)
+        this.emitWithState('SayHello');
+    },
+    'SayHello': function () {
+        this.response.speak('Welcome to City of Raleigh on Alexa. You can ask for information such as what is my trash day or is this my recycling week.')
+            .cardRenderer('Welcome to City of Raleigh on Alexa', 'You can ask for information such as what is my trash day or is this my recycling week.');
+        this.emit(':responseReady');
+        // this.emit('GetDeviceAddress');
+    },
+    'Menu': function () {
+        this.response.speak('You can ask about the following city services, what is my trash day, who is my city council person, is this my recycling week.')
+            .cardRenderer('Welcome to City of Raleigh on Alexa', 'You can ask for information such as what is my trash day or is this my recycling week.');
+        this.emit(':responseReady');
+        // this.emit('GetDeviceAddress');
+    },
     'SolidWaste': function () {
         var intentObj = this.event.request.intent;
         const consentToken = this.event.context.System.apiAccessToken;
@@ -98,20 +114,23 @@ var handlers = {
         var intentObj = this.event.request.intent;
         const consentToken = this.event.context.System.apiAccessToken;
         console.log('consentTOken is ', consentToken);
+        console.log('inside District - toLowerCase error', intentObj.slots.districttype.value);
+        if (typeof intentObj.slots.districttype.value !== 'undefined') {
+            let slot = intentObj.slots.districttype.value.toLowerCase();
 
-        let slot = intentObj.slots.districttype.value.toLowerCase();
-        let id = null;
-        let field = null;
-        if (slot === 'cac' || slot === 'citizen advisory council') {
-            id = 1;
-            field = 'NAME';
-        } else if (slot === 'council' || slot === 'city council') {
-            id = 2;
-            field = 'COUNCIL_DIST';
-        } else if (slot === 'police') {
-            id = 3;
-            field = 'DISTRICT';
-        }
+            let id = null;
+            let field = null;
+            if (slot === 'cac' || slot === 'citizen advisory council') {
+                id = 1;
+                field = 'NAME';
+            } else if (slot === 'council' || slot === 'city council') {
+                id = 2;
+                field = 'COUNCIL_DIST';
+            } else if (slot === 'police') {
+                id = 3;
+                field = 'DISTRICT';
+            }
+        
         let gisServiceClient = new GisServiceClient(id, field, 'Your ' + slot + ' district is ');
         if (typeof this.event.context === 'undefined') {
             let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
@@ -140,6 +159,7 @@ var handlers = {
                 this.emit(":tell", err);
             });
         }
+    }
     },
     'Person': function () {
         var intentObj = this.event.request.intent;
@@ -229,8 +249,7 @@ var handlers = {
         this.emit(':responseReady');
     },
     'AMAZON.HelpIntent': function () {
-        this.response.speak("You can try: 'alexa, hello world' or 'alexa, ask hello world my" +
-            " name is awesome Aaron'");
+        this.response.speak("You can try: 'Ask City of Raleigh what is my trash day', or 'Ask City of Raleigh is it my recycling week', or 'Ask City of Raleigh who is my council person'");
         this.emit(':responseReady');
     },
     'AMAZON.CancelIntent': function () {
@@ -238,7 +257,6 @@ var handlers = {
         this.emit(':responseReady');
     },
     'Unhandled': function () {
-        this.response.speak("Sorry, I didn't get that. You can try: 'alexa, hello world'" +
-            " or 'alexa, ask hello world my name is awesome Aaron'");
+        this.response.speak("Sorry, I didn't get that. You can try: 'Ask City of Raleigh what is my trash day', or 'Ask City of Raleigh is it my recycling week', or 'Ask City of Raleigh who is my council person'");
     }
 };
