@@ -4,13 +4,13 @@ const Https = require('https');
 const geocodeUrl = "https://maps.raleighnc.gov";
 class GisServiceClient {
     constructor(id, field, speech) {
-       this.id = id;
-       this.field = field;
-       this.speech = speech;
+        this.id = id;
+        this.field = field;
+        this.speech = speech;
     }
 
     getGisData(address) {
-        let requestOptions = this.__getRequestOptions('/arcgis/rest/services/Locators/CompositeLocator/GeocodeServer/findAddressCandidates?f=json&outSR=4326&SingleLine=' + encodeURIComponent(address));//{'f': 'json', 'SingleLine': address, 'outSR': 4326};        
+        let requestOptions = this.__getRequestOptions('/arcgis/rest/services/Locators/CompositeLocator/GeocodeServer/findAddressCandidates?f=json&outSR=4326&SingleLine=' + encodeURIComponent(address)); //{'f': 'json', 'SingleLine': address, 'outSR': 4326};        
         return new Promise((fulfill, reject) => {
             this.__geocodeAddress(requestOptions, fulfill, reject).then(location => {
                 if (!location) {
@@ -27,7 +27,7 @@ class GisServiceClient {
             }).catch(err => {
                 reject(err);
             });
-          
+
         });
     }
 
@@ -39,9 +39,12 @@ class GisServiceClient {
                     let responsePayloadObject = JSON.parse(data);
                     if (responsePayloadObject.candidates.length > 0) {
                         let location = responsePayloadObject.candidates[0].location;
-                        fulfill(location);                  
+                        fulfill(location);
                     } else {
-                        fulfill({found: false, location: null});
+                        fulfill({
+                            found: false,
+                            location: null
+                        });
                     }
                 });
             });
@@ -55,25 +58,25 @@ class GisServiceClient {
             Https.get(requestOptions, function (response) {
                 response.on('data', (data) => {
                     let responsePayloadObject = JSON.parse(data);
-                    console.log(responsePayloadObject);
+                    console.log('response = ', responsePayloadObject);
+                        if (responsePayloadObject.features.length > 0) {
+                            let attribute = responsePayloadObject.features[0].attributes[field];
+                            fulfill(attribute);
+                        } else {
+                            reject("Sorry I could not find information for your address. Your address does not appear to be inside Raleigh city limits");
+                        }
                     
-                    if (responsePayloadObject.features.length > 0) {
-                        let attribute = responsePayloadObject.features[0].attributes[field];
-                        fulfill(attribute);
-                    } else {
-                        reject("Sorry I could not find information for your address");
-                    }
                 });
             });
         });
-    }    
+    }
     __getRequestOptions(path) {
         return {
             hostname: 'maps.raleighnc.gov',
             path: path,
             method: 'GET'
         };
-    }    
+    }
 }
 
 module.exports = GisServiceClient;

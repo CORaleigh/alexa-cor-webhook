@@ -1,6 +1,6 @@
 {
   "name": "alexa-cor-webhook",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "alexa-sdk": "^1.0.9",
+    "alexa-sdk": "^1.0.24",
     "https": "^1.0.0",
     "moment": "^2.18.1"
   }

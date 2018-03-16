@@ -72,7 +72,7 @@ class AlexaDeviceAddressClient {
                 fulfill(deviceAddressResponse);
             });
         }).on('error', (e) => {
-            console.error(e);
+            console.error("here in this place",e);
             reject();
         });
     }
