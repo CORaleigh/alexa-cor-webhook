@@ -25,11 +25,20 @@ const getAddressFromDevice = function (consentToken, deviceId, apiEndpoint) {
                 case 200:
                     const address = addressResponse.address;
                     console.log('address from device is ', address);
-                    if (address.city != "RALEIGH") {
-                        console.log('address city is not in Raleigh');
-                        // this.response.speak('address is not in raleigh');
-                        // this.emit(':responseReady');
+                    console.log('typeof address from device is ', typeof address.city);
+                    if (address.city !== null) {
+                        if (address.city.toUpperCase() != "RALEIGH") {
+                            console.log('address city is not in Raleigh');
+                            return 'address city is not in Raleigh';
+                            // this.response.speak('address is not in raleigh');
+                            // this.emit(':responseReady');
+                        }
+                    } else {
+                        console.log('address is null and hasnt been setup in Alexa app');
+                        fulfill('Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits');
+                        return 'Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits';
                     }
+                    
                     // fulfill(address['addressLine1']);
                     fulfill(address.addressLine1);
                     return address.addressLine1;
@@ -39,11 +48,11 @@ const getAddressFromDevice = function (consentToken, deviceId, apiEndpoint) {
                 case 204:
                     // This likely means that the user didn't have their address set via the companion app.
                     console.log("Successfully requested from the device address API, but no address was returned.");
-                    reject("No address was returned from your device");
+                    reject("Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits");
                     break;
                 case 403:
                     console.log("The consent token we had wasn't authorized to access the user's address.");
-                    reject("Permission to obtain device address denied");
+                    reject("Permission to obtain device address denied. Make you you have enable address permissions in the skill settings");
                     break;
                 default:
                     reject("Failed to obtain device address");
@@ -58,7 +67,7 @@ var handlers = {
         this.emitWithState('SayHello');
     },
     'SayHello': function () {
-        this.response.speak('Welcome to City of Raleigh on Alexa. You can ask for information such as what is my trash day or is this my recycling week.')
+        this.response.speak('Welcome to City of Raleigh on Alexa. You can ask for information such as what is my trash day or is this my recycling week, or who is my council member, or what CAC district am I in')
             .cardRenderer('Welcome to City of Raleigh on Alexa', 'You can ask for information such as what is my trash day or is this my recycling week.');
         this.emit(':responseReady');
         // this.emit('GetDeviceAddress');
@@ -100,14 +109,18 @@ var handlers = {
                     this.emit(":tell", response);
                 }).catch(err => {
                     console.log("Promise Rejected", err);
-                    err = err + " response error";
+                    err = err;
                     this.emit(":tell", err);
                 });
             }).catch(err => {
                 console.log("Promise Rejected", err);
-                err = err + " response error two";
+                err = err;
                 this.emit(":tell", err);
             });
+            // if (typeof theword === 'undefined'){
+            //     this.response.speak("You haven't setup your address for your alexa device in the alexa app settings, please tell me your address");
+            //     this.emitWithState('SayHello');
+            // }
         }
     },
     'District': function () {
@@ -117,7 +130,6 @@ var handlers = {
         console.log('inside District - toLowerCase error', intentObj.slots.districttype.value);
         if (typeof intentObj.slots.districttype.value !== 'undefined') {
             let slot = intentObj.slots.districttype.value.toLowerCase();
-
             let id = null;
             let field = null;
             if (slot === 'cac' || slot === 'citizen advisory council') {
@@ -130,36 +142,36 @@ var handlers = {
                 id = 3;
                 field = 'DISTRICT';
             }
-        
-        let gisServiceClient = new GisServiceClient(id, field, 'Your ' + slot + ' district is ');
-        if (typeof this.event.context === 'undefined') {
-            let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
-            gisServiceRequest.then((response) => {
-                this.emit(":tell", response);
-            });
-        } else {
-            // const consentToken = this.event.context.System.user.permissions.consentToken;
-            // const consentToken = this.event.context.System.apiAccessToken;
-            if (!consentToken) {
-                this.emit(":tell", "you didnt give me permission");
-            }
-            const deviceId = this.event.context.System.device.deviceId;
-            const apiEndpoint = this.event.context.System.apiEndpoint;
-            getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
-                let gisServiceRequest = gisServiceClient.getGisData(address);
+
+            let gisServiceClient = new GisServiceClient(id, field, 'Your ' + slot + ' district is ');
+            if (typeof this.event.context === 'undefined') {
+                let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
                 gisServiceRequest.then((response) => {
                     this.emit(":tell", response);
+                });
+            } else {
+                // const consentToken = this.event.context.System.user.permissions.consentToken;
+                // const consentToken = this.event.context.System.apiAccessToken;
+                if (!consentToken) {
+                    this.emit(":tell", "you didnt give me permission");
+                }
+                const deviceId = this.event.context.System.device.deviceId;
+                const apiEndpoint = this.event.context.System.apiEndpoint;
+                getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
+                    let gisServiceRequest = gisServiceClient.getGisData(address);
+                    gisServiceRequest.then((response) => {
+                        this.emit(":tell", response);
+                    }).catch(err => {
+                        err = err + "error one";
+                        this.emit(":tell", err);
+                    });
                 }).catch(err => {
-                    err = err + "error one";
+                    err = err + "error two";
+
                     this.emit(":tell", err);
                 });
-            }).catch(err => {
-                err = err + "error two";
-
-                this.emit(":tell", err);
-            });
+            }
         }
-    }
     },
     'Person': function () {
         var intentObj = this.event.request.intent;
@@ -198,6 +210,8 @@ var handlers = {
         }
     },
     'Recycling': function () {
+        // console.log('slot for prompted addres is ', intentObj.slots.promptedAddress.value);
+
         var intentObj = this.event.request.intent;
         const consentToken = this.event.context.System.apiAccessToken;
         console.log('consentTOken is ', consentToken);
@@ -223,20 +237,45 @@ var handlers = {
             const deviceId = this.event.context.System.device.deviceId;
             const apiEndpoint = this.event.context.System.apiEndpoint;
             getAddressFromDevice(consentToken, deviceId, apiEndpoint).then(address => {
+                console.log('getAddressFromDevice address = ', address);
+                console.log('typeof address', typeof address);
+                
+                
                 let gisServiceRequest = gisServiceClient.getGisData(address);
                 gisServiceRequest.then((response) => {
-                    let isOdd = (moment().week() % 2) == 1;
-                    if (response === 'B' && isOdd) {
-                        this.emit(":tell", 'No this is not your recycling week');
+                    console.log('response of recycle week features', response);
+                    if (response !== 'Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits') {
+                        // if (response.features.length > 0) {
+                            let isOdd = (moment().week() % 2) == 1;
+                            if (response === 'B' && isOdd) {
+                                this.emit(":tell", 'No this is not your recycling week');
+                            }
+                            else if (response === 'B' && isOdd == 0) {
+                                this.emit(":tell", "Yes this is your recycling week");
+                            }
+                            else if (response === 'A' && isOdd) {
+                                this.emit(":tell", "Yes this is your recycling week");
+                            }
+                            else if (response === 'A' && isOdd == 0) {
+                                this.emit(":tell", "No this is not your recycling week");
+                            }
+                        // } else {
+                        //     console.log('no response came back for recycling week');
+                        // }
+                    } else {
+                        this.response.speak('Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits');
+                        this.emit(':responseReady');
+                        // console.log('slot for prompted addres is ', intentObj.slots.promptedAddress.value);
+
                     }
-                    this.emit(":tell", "Yes this is your recycling week");
+
+
                 }).catch(err => {
-                    err = err + "some error";
+                    err = err;
                     this.emit(":tell", err);
                 });
             }).catch(err => {
-                err = err + "some error one two";
-
+                err = err;
                 this.emit(":tell", err);
             });
         }

@@ -2,8 +2,7 @@
   "interactionModel": {
     "languageModel": {
       "invocationName": "city of raleigh",
-      "intents": [
-        {
+      "intents": [{
           "name": "AMAZON.CancelIntent",
           "samples": []
         },
@@ -16,22 +15,23 @@
           "samples": []
         },
         {
-          "name": "Menu",          
+          "name": "Menu",
           "samples": [
             "what can i do",
             "what can i try",
-            "what options are available"
+            "what options are available",
+            "list out the available services",
+            "what services are available",
+            "what can city of raleigh do"
           ]
         },
         {
           "name": "District",
-          "slots": [
-            {
-              "name": "districttype",
-              "type": "districttype",
-              "samples": []
-            }
-          ],
+          "slots": [{
+            "name": "districttype",
+            "type": "districttype",
+            "samples": []
+          }],
           "samples": [
             "what is my {districttype} district",
             "what is my {districttype} area",
@@ -50,18 +50,23 @@
         },
         {
           "name": "Recycling",
+          "slots": [{
+            "name": "promptedAddress",
+            "type": "AMAZON.StreetAddress"
+          }],
           "samples": [
             "do I need to take my recycling out this week",
-            "is it my recycling week"
+            "is it my recycling week",
+            "is this my recycle week",
+            "{promptedAddress}",
+            "my address is {promptedAddress}"
           ]
         },
         {
           "name": "SolidWaste",
-          "slots": [
-            {
+          "slots": [{
               "name": "address",
-              "type": "AMAZON.StreetAddress",
-              "samples": []
+              "type": "AMAZON.StreetAddress"
             },
             {
               "name": "wastetype",
@@ -70,14 +75,14 @@
             }
           ],
           "samples": [
-            "when is my {wastetype} day"
+            "when is my {wastetype} day",
+            "what is my {wastetype} day",
+            "is it my {wastetype} day"
           ]
         }
       ],
-      "types": [
-        {
-          "values": [
-            {
+      "types": [{
+          "values": [{
               "name": {
                 "value": "CAC"
               }
@@ -106,8 +111,7 @@
           "name": "districttype"
         },
         {
-          "values": [
-            {
+          "values": [{
               "name": {
                 "value": "city council person"
               }
@@ -121,8 +125,7 @@
           "name": "persontype"
         },
         {
-          "values": [
-            {
+          "values": [{
               "name": {
                 "value": "trash"
               }
