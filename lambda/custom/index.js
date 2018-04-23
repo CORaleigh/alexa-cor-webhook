@@ -29,6 +29,7 @@ const getAddressFromDevice = function (consentToken, deviceId, apiEndpoint) {
                     if (address.city !== null) {
                         if (address.city.toUpperCase() != "RALEIGH") {
                             console.log('address city is not in Raleigh');
+                            fulfill('Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits');
                             return 'address city is not in Raleigh';
                             // this.response.speak('address is not in raleigh');
                             // this.emit(':responseReady');
@@ -67,6 +68,7 @@ var handlers = {
         this.emitWithState('SayHello');
     },
     'SayHello': function () {
+        this.response.shouldEndSession(false, "Reprompt your user here");
         this.response.speak('Welcome to City of Raleigh on Alexa. You can ask for information such as what is my trash day or is this my recycling week, or who is my council member, or what CAC district am I in')
             .cardRenderer('Welcome to City of Raleigh on Alexa', 'You can ask for information such as what is my trash day or is this my recycling week.');
         this.emit(':responseReady');
@@ -75,6 +77,7 @@ var handlers = {
     'Menu': function () {
         this.response.speak('You can ask about the following city services, what is my trash day, who is my city council person, is this my recycling week.')
             .cardRenderer('Welcome to City of Raleigh on Alexa', 'You can ask for information such as what is my trash day or is this my recycling week.');
+        this.response.shouldEndSession(false, 'we did not end the session');
         this.emit(':responseReady');
         // this.emit('GetDeviceAddress');
     },

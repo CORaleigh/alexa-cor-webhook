@@ -12,5 +12,8 @@
     "alexa-sdk": "^1.0.24",
     "https": "^1.0.0",
     "moment": "^2.18.1"
+  },
+  "devDependencies": {
+    "@types/alexa-sdk": "^1.1.1"
   }
 }

@@ -5,9 +5,9 @@
         "en-US": {
           "summary": "Sample Short Description",
           "examplePhrases": [
-            "Alexa open hello world",
-            "Alexa tell hello world I am Jeff",
-            "Alexa tell hello world my name is Peter"
+            "Alexa open City of Raleigh",
+            "Alexa ask City of Raleigh what is my trash day",
+            "Alexa ask City of Raleigh is this my recycle week"
           ],
           "name": "corAlexa",
           "description": "Sample Full Description"
