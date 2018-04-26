@@ -75,6 +75,7 @@ var handlers = {
         // this.emit('GetDeviceAddress');
     },
     'Menu': function () {
+        this.response.shouldEndSession(false, "Reprompt your user here");
         this.response.speak('You can ask about the following city services, what is my trash day, who is my city council person, is this my recycling week.')
             .cardRenderer('Welcome to City of Raleigh on Alexa', 'You can ask for information such as what is my trash day or is this my recycling week.');
         this.response.shouldEndSession(false, 'we did not end the session');
@@ -87,6 +88,9 @@ var handlers = {
         console.log('consentTOken is ', consentToken);
 
         console.log('wastetype is ', intentObj.slots.wastetype.value);
+        // if (intentObj.slots.wastetype.value != 'trash' || intentObj.slots.wastetype.value != 'yard') {
+
+        // }
         let gisServiceClient = new GisServiceClient(12, 'DAY', 'Your ' + intentObj.slots.wastetype.value + ' day is ');
         if (typeof this.event.context === 'undefined') {
             let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
@@ -129,10 +133,14 @@ var handlers = {
     'District': function () {
         var intentObj = this.event.request.intent;
         const consentToken = this.event.context.System.apiAccessToken;
-        console.log('consentTOken is ', consentToken);
-        console.log('inside District - toLowerCase error', intentObj.slots.districttype.value);
-        if (typeof intentObj.slots.districttype.value !== 'undefined') {
-            let slot = intentObj.slots.districttype.value.toLowerCase();
+        // console.log('consentTOken is ', consentToken);
+        // console.log('inside District - toLowerCase error', intentObj.slots.districttype.value);
+        let slot = intentObj.slots.districttype.value.toLowerCase();
+        console.log('the slot is, ', slot);
+        // if (typeof slot !== 'undefined' || slot === 'cac' || slot === 'citizen advisory council'
+        if (slot === 'cac' || slot === 'citizen advisory council'
+                || slot ==='council' || slot === 'city council' || slot === 'police') {
+            // let slot = intentObj.slots.districttype.value.toLowerCase();
             let id = null;
             let field = null;
             if (slot === 'cac' || slot === 'citizen advisory council') {
@@ -144,7 +152,7 @@ var handlers = {
             } else if (slot === 'police') {
                 id = 3;
                 field = 'DISTRICT';
-            }
+            } 
 
             let gisServiceClient = new GisServiceClient(id, field, 'Your ' + slot + ' district is ');
             if (typeof this.event.context === 'undefined') {
@@ -174,6 +182,11 @@ var handlers = {
                     this.emit(":tell", err);
                 });
             }
+        } else {
+            this.response.shouldEndSession(false, "Reprompt your user here");
+            this.response.speak('Sorry, i did not understand the type of request. Please ask what is my council or cac or police district');
+            this.emit(':responseReady');
+
         }
     },
     'Person': function () {
@@ -291,6 +304,7 @@ var handlers = {
         this.emit(':responseReady');
     },
     'AMAZON.HelpIntent': function () {
+        this.response.shouldEndSession(false, "Reprompt your user here");
         this.response.speak("You can try: 'Ask City of Raleigh what is my trash day', or 'Ask City of Raleigh is it my recycling week', or 'Ask City of Raleigh who is my council person'");
         this.emit(':responseReady');
     },

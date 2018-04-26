@@ -69,11 +69,15 @@ class GisServiceClient {
                         fulfill('Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits');
                     } else {
                         console.log('responsePayloadObject = ', responsePayloadObject);
-                        if (responsePayloadObject.features.length > 0) {
-                            let attribute = responsePayloadObject.features[0].attributes[field];
-                            fulfill(attribute);
+                        if (responsePayloadObject && responsePayloadObject.features.length) {  // if (undefined !== theHref && theHref.length)
+                            if (responsePayloadObject.features.length > 0) {
+                                let attribute = responsePayloadObject.features[0].attributes[field];
+                                fulfill(attribute);
+                            } else {
+                                reject("Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits");
+                            }
                         } else {
-                            reject("Sorry I could not find information for your address. Make sure you have entered a valid address in the settings of your Alexa app and that it is within Raleigh city limits");
+                            console.log('bad response came from GIS - CHF')
                         }
                     }
 
