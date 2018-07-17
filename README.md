@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 Ask City of Raleigh questions about various city services.
 
 You can ask the following:
