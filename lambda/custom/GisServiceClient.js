@@ -3,8 +3,9 @@
 const Https = require('https');
 const geocodeUrl = "https://maps.raleighnc.gov";
 class GisServiceClient {
-    constructor(id, field, speech) {
+    constructor(id, url, field, speech) {
         this.id = id;
+        this.url = url;
         this.field = field;
         this.speech = speech;
     }
@@ -57,7 +58,9 @@ class GisServiceClient {
     }
     __getGisAttribute(location, fulfill, reject) {
         return new Promise((fulfill, reject) => {
-            let requestOptions = this.__getRequestOptions('/arcgis/rest/services/Services/PortalServices/MapServer/' + this.id + '/query?f=json&geometry=' + JSON.stringify(location) + '&inSR=4326&geometryType=esriGeometryPoint&returnGeometry=false&outFields=' + this.field);
+            //let requestOptions = this.__getRequestOptions('/arcgis/rest/services/Services/PortalServices/MapServer/' + this.id + '/query?f=json&geometry=' + JSON.stringify(location) + '&inSR=4326&geometryType=esriGeometryPoint&returnGeometry=false&outFields=' + this.field);
+            let requestOptions = this.__getRequestOptions(this.url + '/' + this.id + '/query?f=json&geometry=' + JSON.stringify(location) + '&inSR=4326&geometryType=esriGeometryPoint&returnGeometry=false&outFields=' + this.field);
+            
             console.log(requestOptions);
             let field = this.field;
             Https.get(requestOptions, function (response) {

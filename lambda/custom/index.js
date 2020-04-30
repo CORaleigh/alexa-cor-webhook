@@ -69,7 +69,7 @@ var handlers = {
     },
     'SayHello': function () {
         this.response.shouldEndSession(false, "Reprompt your user here");
-        this.response.speak('Welcome to City of Raleigh on Alexa. You can ask for information such as what is my trash day or is this my recycling week, or who is my council member, or what CAC district am I in')
+        this.response.speak('Welcome to City of Raleigh on Alexa. You can ask for information such as what is my trash day or is this my recycling week, or who is my council member am I in')
             .cardRenderer('Welcome to City of Raleigh on Alexa', 'You can ask for information such as what is my trash day or is this my recycling week.');
         this.emit(':responseReady');
         // this.emit('GetDeviceAddress');
@@ -91,7 +91,7 @@ var handlers = {
         // if (intentObj.slots.wastetype.value != 'trash' || intentObj.slots.wastetype.value != 'yard') {
 
         // }
-        let gisServiceClient = new GisServiceClient(12, 'DAY', 'Your ' + intentObj.slots.wastetype.value + ' day is ');
+        let gisServiceClient = new GisServiceClient(0, 'https://services.arcgis.com/v400IkDOw1ad7Yad/arcgis/rest/services/Solid_Waste_Services_Collection_Areas/FeatureServer','SERVICEDAY', 'Your ' + intentObj.slots.wastetype.value + ' day is ');
         if (typeof this.event.context === 'undefined') {
             let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
             gisServiceRequest.then((response) => {
@@ -143,18 +143,21 @@ var handlers = {
             // let slot = intentObj.slots.districttype.value.toLowerCase();
             let id = null;
             let field = null;
+            let url = null;
             if (slot === 'cac' || slot === 'citizen advisory council') {
                 id = 1;
+                url = 'https://maps.raleighnc.gov/arcgis/rest/services/Boundaries/MapServer';
                 field = 'NAME';
             } else if (slot === 'council' || slot === 'city council') {
                 id = 2;
+                url='https://maps.raleighnc.gov/arcgis/rest/services/Boundaries/MapServer';
                 field = 'COUNCIL_DIST';
             } else if (slot === 'police') {
                 id = 3;
                 field = 'DISTRICT';
             } 
 
-            let gisServiceClient = new GisServiceClient(id, field, 'Your ' + slot + ' district is ');
+            let gisServiceClient = new GisServiceClient(id, url, field, 'Your ' + slot + ' district is ');
             if (typeof this.event.context === 'undefined') {
                 let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
                 gisServiceRequest.then((response) => {
@@ -196,7 +199,7 @@ var handlers = {
         //let slot = intentObj.slots.districttype.value.toLowerCase();
         let id = 2;
         let field = 'COUNCIL_PERSON';
-        let gisServiceClient = new GisServiceClient(id, field, 'Your city council person is ');
+        let gisServiceClient = new GisServiceClient(id, 'https://maps.raleighnc.gov/arcgis/rest/services/Boundaries/MapServer', field, 'Your city council person is ');
         if (typeof this.event.context === 'undefined') {
             let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
             gisServiceRequest.then((response) => {
@@ -232,14 +235,14 @@ var handlers = {
         const consentToken = this.event.context.System.apiAccessToken;
         console.log('consentTOken is ', consentToken);
         //let slot = intentObj.slots.districttype.value.toLowerCase();
-        let id = 12;
-        let field = 'WEEK';
-        let gisServiceClient = new GisServiceClient(id, field, '');
+        let id = 0;
+        let field = 'SER_WEEK';
+        let gisServiceClient = new GisServiceClient(id, 'https://services.arcgis.com/v400IkDOw1ad7Yad/ArcGIS/rest/services/Solid_Waste_Services_Collection_Areas/FeatureServer',field, '');
         if (typeof this.event.context === 'undefined') {
             let gisServiceRequest = gisServiceClient.getGisData("1234 Brooks Ave");
             gisServiceRequest.then((response) => {
                 let isOdd = (moment().week() % 2) == 1;
-                if (response === 'B' && isOdd) {
+                if (response === 'WEEK_B' && isOdd) {
                     this.emit(":tell", 'No this is not your recycling week');
                 }
                 this.emit(":tell", "Yes this is your recycing week");
